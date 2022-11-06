@@ -6,13 +6,14 @@ import {fileURLToPath} from 'url';
 import RootRouter from './routes/route.js'
 import cookieParser  from "cookie-parser";
 import cors from 'cors'
-import { errorHandler } from "./middleware/errorHandler.js";
+//import { errorHandler } from "./middleware/errorHandler.js";
 import {logger} from "./middleware/logger.js"
 //import redis from 'redis'
 import corsOption from "./config/corsOption.js";
 import connectDB from './config/connectDB.js'
 import mongoose from 'mongoose';
 import userRouter from "./routes/userRoutes.js"
+import  authRouter from './routes/authRoutes.js'
 
 
 
@@ -26,7 +27,8 @@ connectDB();
 
 const app = express();
 
-const prefix = "/api/stackOverflow"; 
+const prefix = "/api/tech"; 
+const authPrefix =  "/api/tech/auth"; 
 
 
 const port = process.env.PORT || 5000;
@@ -41,7 +43,7 @@ app.use(logger )
 
 
 
-app.use(cors())
+app.use(cors(corsOption))
 app.use(express.json())
 app.use(cookieParser())
 //creatin middleware for static folders which will be accesible by all
@@ -50,7 +52,9 @@ app.use('/', express.static('public'))
 //app.use('/', express.static(path.join(__dirname,  'public')))
 
 
+app.use(authPrefix, authRouter);
 app.use(prefix, userRouter); //http://localhost:5000/api/stackOverflow/allusers
+
 
 app.use('/', RootRouter)
 
@@ -71,7 +75,7 @@ app.all('*', (req, res)=>{
     }
 })
 
-app.use(errorHandler)  
+//app.use(errorHandler)  
 mongoose.connection.once('open', ()=>{
     console.log("Connected to MongoBB")
     app.listen(port, () => console.log(`Listening on locahost: ${port}`));

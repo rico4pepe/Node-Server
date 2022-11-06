@@ -32,7 +32,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
 // Create New Users - Post method
 export const createNewUser =  (async (req, res) => {
-    const {email, name, password} = req.body;
+    const {email, name, password, roles, active} = req.body;
     //Check if user already exist 
     const existingUser = await User.findOne({email}).lean().exec()
     if(existingUser){
@@ -49,6 +49,8 @@ export const createNewUser =  (async (req, res) => {
         email,
         name,
         password: hashpassword,
+        roles,
+        active,
     }) ;
 
     if(result){
@@ -102,5 +104,39 @@ export const googleSignIn = asyncHandler(async (req, res) => {
     if(result){
         res.status(201).json({result});
     }
+})
+
+//update user 
+export const updateUser = asyncHandler(async (req, res) => {
+    const {id, name, roles, active, password} = req.body;
+
+    //Confirm Data exist
+    if(!id || !Array.isArray(roles) || !name || !roles.length || typeof active !== 'boolean' ){
+        return res.status(400).json({message: 'All fields are required'})
+    }
+
+    const user = await User.findById(id).exec()
+
+    if(!user){
+        return res.status(400).json({message: 'User not found'})  
+    }
+
+    const duplicate = await User.findOne({name}).lean().exec()
+    //Allow update to the origina user
+    if(duplicate && duplicate?._id.toString() !== id){
+        return res.status(409).json({message: 'Duplicate Username'})
+    }
+
+    user.name = name
+    user.roles = roles
+    user.active = active
+
+    if(password){
+        //Hash password
+        user.password = await bcrypt.hash(password, 12) //salt round
+    }
+
+    const updateUser = await user.save()
+    res.json({message : `${updateUser.name} updated`} )
 })
 

@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { v4 as uuidv4 } from 'uuid';
+import { uuid } from 'uuidv4';
 import fs from 'fs'
 import {fileURLToPath} from 'url';
 import path from 'path'
