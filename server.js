@@ -8,11 +8,12 @@ import cookieParser  from "cookie-parser";
 import cors from 'cors'
 import { errorHandler } from "./middleware/errorHandler.js";
 import {logger} from "./middleware/logger.js"
-import redis from 'redis'
+//import redis from 'redis'
 import corsOption from "./config/corsOption.js";
 import connectDB from './config/connectDB.js'
 import mongoose from 'mongoose';
 import userRouter from "./routes/userRoutes.js"
+
 
 
 dotenv.config({ debug: true })
@@ -42,6 +43,7 @@ app.use(logger )
 
 app.use(cors())
 app.use(express.json())
+app.use(cookieParser())
 //creatin middleware for static folders which will be accesible by all
 app.use('/', express.static('public'))
 //explicitly creating the middle ware above
@@ -69,7 +71,7 @@ app.all('*', (req, res)=>{
     }
 })
 
-app.use(errorHandler)
+app.use(errorHandler)  
 mongoose.connection.once('open', ()=>{
     console.log("Connected to MongoBB")
     app.listen(port, () => console.log(`Listening on locahost: ${port}`));
